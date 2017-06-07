@@ -25,7 +25,9 @@ export const buttonUnderlayLight = '#eee';
 
 export default StyleSheet.create({
   appContainer: {
-    flex: 1
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center'
   } as ViewStyle,
 
   appWrapper: {
