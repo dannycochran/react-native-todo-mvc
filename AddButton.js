@@ -12,6 +12,7 @@ export default class AddButton extends React.Component {
     return (
       <TouchableHighlight style={styles.addButton}
         onPress={this.props.addTodo}
+        disabled={this.props.disabled}
         underlayColor={buttonUnderlay}>
         <Text style={styles.addText}>Add Todo</Text>
       </TouchableHighlight>

@@ -9,6 +9,7 @@ import {
   AppRegistry,
   ActivityIndicator,
   AsyncStorage,
+  KeyboardAvoidingView,
   StyleSheet,
   ScrollView,
   Text,
@@ -19,12 +20,14 @@ import styles from './styles';
 
 import AddButton from './AddButton';
 import AddInput from './AddInput';
+import Footer from './Footer';
 import Todo from './Todo';
 
 export default class App extends React.Component {
   state = {
     todos: [],
     input: '',
+    selectedTab: 'active',
     loading: false,
     editing: false,
     scrollEnabled: true
@@ -84,12 +87,22 @@ export default class App extends React.Component {
     this.setState({ scrollEnabled: false });
   }
 
+  onChangeTab(selectedTab) {
+    this.setState({ selectedTab });
+  }
+
   onFocusInput(editing) {
     this.setState({ editing });
   }
 
   onInput(input) {
     this.setState({ input });
+  }
+
+  getTodos() {
+    return this.state.todos.filter(todo => {
+      return this.state.selectedTab === 'active' ? todo.completed === false : todo.completed === true;
+    });
   }
 
   componentDidMount() {
@@ -108,14 +121,17 @@ export default class App extends React.Component {
 
     return (
       <View style={styles.appContainer}>
-        <Text style={styles.headerText}>todos</Text>
-        <AddInput onFocus={this.onFocusInput.bind(this)} onInput={this.onInput.bind(this)} input={this.state.input}/>
-        <View style={styles.scrollContainer}>
-          <ScrollView ref={(ref) => this.scrollView = ref} style={{flex: 1}} scrollEnabled={this.state.scrollEnabled}>
-            {this.state.todos.map(t => <Todo {...t} key={t.id} {...todoHandlers}/>)}
-          </ScrollView>
-        </View>
-        {this.state.editing ? <AddButton addTodo={this.addTodo.bind(this)}/> : null }
+        <KeyboardAvoidingView style={styles.appWrapper} behavior='padding'>
+          <Text style={styles.headerText}>todos</Text>
+          <AddInput onFocus={this.onFocusInput.bind(this)} onInput={this.onInput.bind(this)} input={this.state.input}/>
+          <View style={styles.scrollContainer}>
+            <ScrollView ref={(ref) => this.scrollView = ref} style={{flex: 1}} scrollEnabled={this.state.scrollEnabled}>
+              {this.getTodos().map(t => <Todo {...t} key={t.id} {...todoHandlers}/>)}
+            </ScrollView>
+          </View>
+          {this.state.editing ? <AddButton addTodo={this.addTodo.bind(this)} disabled={this.state.input.length === 0}/> : null }
+        </KeyboardAvoidingView>
+        <Footer onChangeTab={this.onChangeTab.bind(this)} selectedTab={this.state.selectedTab} />
       </View>
     );
   }
