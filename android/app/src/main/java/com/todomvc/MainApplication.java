@@ -1,4 +1,4 @@
-package com.actual;
+package com.todomvc;
 
 import android.app.Application;
 

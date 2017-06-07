@@ -7,11 +7,17 @@ import {
 } from 'react-native';
 
 import styles, { buttonUnderlayLight } from './styles';
+import { TabType } from './App';
 
 const tabs = ['active', 'completed'];
 
-export default class Footer extends React.Component {
-  renderTab(tab, index) {
+interface FooterProps {
+  selectedTab: TabType;
+  onChangeTab: (tabName: TabType) => void;
+}
+
+export default class Footer extends React.Component<FooterProps, {}> {
+  renderTab(tab: TabType) {
     const tabStyles = [
       styles.tabContainer,
       tab === this.props.selectedTab ? styles.selectedTab : {}

@@ -1,4 +1,4 @@
-import React from 'react';
+import * as React from 'react';
 
 import {
   Text,
@@ -7,7 +7,12 @@ import {
 
 import styles, { buttonUnderlay } from './styles';
 
-export default class AddButton extends React.Component {
+interface AddButtonProps {
+  addTodo: () => void;
+  disabled: boolean;
+}
+
+export default class AddButton extends React.Component<AddButtonProps, {}> {
   render() {
     return (
       <TouchableHighlight style={styles.addButton}

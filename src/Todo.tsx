@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {
   Animated,
   View,
@@ -11,6 +12,8 @@ import styles, {
   shadowProps
 } from './styles';
 
+import { TodoItem } from './App';
+
 const backgroundColors = {
   default: '#ccc',
   deleting: '#ef5350',
@@ -20,20 +23,28 @@ const backgroundColors = {
 const actionThreshold = width / 4;
 const minDragThreshold = 2;
 
-export default class Todo extends React.Component {
-  constructor(props) {
-    super(props);
-    this.panX = 0;
-    this.translateX = new Animated.Value(0);
-    this.panResponder = this.createPanResponder();
+interface TodoProps extends TodoItem {
+  onReleaseTodo: (id: string, config: { remove?: boolean; complete?: boolean }) => void;
+  onDragTodo: () => void;
+}
 
-    this.state = {
-      backgroundColor: backgroundColors.default
-    };
-  };
+interface TodoState {
+  backgroundColor: string;
+  dragging: boolean;
+}
+
+export default class Todo extends React.Component<TodoProps, TodoState> {
+  panX: number = 0;
+  translateX: Animated.Value = new Animated.Value(0);
+  panResponder = this.createPanResponder();
+
+  state = {
+    backgroundColor: backgroundColors.default,
+    dragging: false
+  }
 
   onReleaseTodo() {
-    this.setState({ moving: false });
+    this.setState({ dragging: false });
 
     const complete = this.panX > actionThreshold;
     const remove = this.panX < -actionThreshold;
@@ -57,22 +68,21 @@ export default class Todo extends React.Component {
 
       this.setState({
         backgroundColor: this.panX > 0 ? backgroundColors.completing : backgroundColors.deleting,
-        moving: true
+        dragging: true
       });
     }
   }
 
   createPanResponder() {
     return PanResponder.create({
-      onStartShouldSetPanResponder: (evt, gestureState) => true,
-      onStartShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onMoveShouldSetPanResponder: (evt, gestureState) => true,
-      onMoveShouldSetPanResponderCapture: (evt, gestureState) => true,
-      onPanResponderGrant: (evt, gestureState) => { this.panX = 0; },
+      onStartShouldSetPanResponder: () => true,
+      onStartShouldSetPanResponderCapture: () => true,
+      onMoveShouldSetPanResponder: () => true,
+      onMoveShouldSetPanResponderCapture: () => true,
+      onPanResponderGrant: () => { this.panX = 0; },
       onPanResponderMove: (evt, gestureState) => this.onDragTodo(gestureState.dx),
-      onPanResponderTerminationRequest: (evt, gestureState) => { this.onReleaseTodo(); return true },
-      onPanResponderRelease: (evt, gestureState) => this.onReleaseTodo(),
-      onShouldBlockNativeResponder: (evt, gestureState) => true
+      onPanResponderTerminationRequest: () => { this.onReleaseTodo(); return true },
+      onPanResponderRelease: () => this.onReleaseTodo()
     });
   }
 
@@ -84,7 +94,7 @@ export default class Todo extends React.Component {
         ]
       },
       styles.todoWrapper,
-      this.state.moving ? shadowProps : {}
+      this.state.dragging ? shadowProps : {}
     ];
 
     return (

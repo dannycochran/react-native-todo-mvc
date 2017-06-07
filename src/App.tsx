@@ -1,17 +1,10 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- * @flow
- */
-
-import React from 'react';
+import * as React from 'react';
 import {
-  AppRegistry,
   ActivityIndicator,
   AsyncStorage,
   KeyboardAvoidingView,
-  StyleSheet,
   ScrollView,
+  ScrollViewStatic,
   Text,
   View
 } from 'react-native';
@@ -23,7 +16,25 @@ import AddInput from './AddInput';
 import Footer from './Footer';
 import Todo from './Todo';
 
-export default class App extends React.Component {
+export interface TodoItem {
+  id: string;
+  description: string;
+  timestamp: number;
+  completed: boolean;
+}
+
+export type TabType = 'active' | 'completed';
+
+interface AppState {
+  todos: TodoItem[],
+  input: string;
+  selectedTab: TabType;
+  loading: boolean;
+  editing: boolean;
+  scrollEnabled: boolean;
+}
+
+export default class App extends React.Component<{}, AppState> {
   state = {
     todos: [],
     input: '',
@@ -31,7 +42,9 @@ export default class App extends React.Component {
     loading: false,
     editing: false,
     scrollEnabled: true
-  }
+  } as AppState;
+
+  scrollView: ScrollViewStatic = null;
 
   async addTodo() {
     const timestamp = Date.now();
@@ -69,7 +82,7 @@ export default class App extends React.Component {
   }
 
   async onReleaseTodo(todoId, config) {
-    this.scrollView.scrollTo({ y: 0, animate: true });
+    this.scrollView.scrollTo({ y: 0, animated: true });
     const todoIndex = this.state.todos.findIndex(t => t.id === todoId);
     const todos = [ ...this.state.todos ];
 
@@ -83,7 +96,7 @@ export default class App extends React.Component {
     this.setState({ scrollEnabled: true, todos });
   }
 
-  onDragTodo(callback) {
+  onDragTodo() {
     this.setState({ scrollEnabled: false });
   }
 
@@ -99,14 +112,21 @@ export default class App extends React.Component {
     this.setState({ input });
   }
 
-  getTodos() {
-    return this.state.todos.filter(todo => {
-      return this.state.selectedTab === 'active' ? todo.completed === false : todo.completed === true;
-    });
-  }
-
   componentDidMount() {
     this.fetchTodos();
+  }
+
+  renderTodos() {
+    const todoHandlers = {
+      onDragTodo: this.onDragTodo.bind(this),
+      onReleaseTodo: this.onReleaseTodo.bind(this)
+    };
+
+    return this.state.todos.filter(todo => {
+      return this.state.selectedTab === 'active' ? todo.completed === false : todo.completed === true;
+    }).map(todo => (
+      <Todo {...{...todo, ...todoHandlers}} key={todo.id}/>
+    ));
   }
 
   render() {
@@ -114,19 +134,14 @@ export default class App extends React.Component {
       return <ActivityIndicator style={styles.centered} animating={true} size='large'/>;
     }
 
-    const todoHandlers = {
-      onDragTodo: this.onDragTodo.bind(this),
-      onReleaseTodo: this.onReleaseTodo.bind(this)
-    };
-
     return (
       <View style={styles.appContainer}>
         <KeyboardAvoidingView style={styles.appWrapper} behavior='padding'>
           <Text style={styles.headerText}>todos</Text>
           <AddInput onFocus={this.onFocusInput.bind(this)} onInput={this.onInput.bind(this)} input={this.state.input}/>
           <View style={styles.scrollContainer}>
-            <ScrollView ref={(ref) => this.scrollView = ref} style={{flex: 1}} scrollEnabled={this.state.scrollEnabled}>
-              {this.getTodos().map(t => <Todo {...t} key={t.id} {...todoHandlers}/>)}
+            <ScrollView ref={(ref) => this.scrollView = ref as any} style={{flex: 1}} scrollEnabled={this.state.scrollEnabled}>
+              {this.renderTodos()}
             </ScrollView>
           </View>
           {this.state.editing ? <AddButton addTodo={this.addTodo.bind(this)} disabled={this.state.input.length === 0}/> : null }
@@ -136,5 +151,3 @@ export default class App extends React.Component {
     );
   }
 }
-
-AppRegistry.registerComponent('actual', () => App);
