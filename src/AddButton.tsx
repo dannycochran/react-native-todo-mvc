@@ -8,12 +8,17 @@ import styles from './styles';
 
 import AddInput from './AddInput';
 
-export default class App extends React.Component<{}, {}> {
+interface AddButtonProps {
+  addTodo: () => void;
+}
+
+export default class App extends React.Component<AddButtonProps, {}> {
   render() {
 
     return (
-      <TouchableHighlight style={styles.appContainer}>
-        <Text>Add Todo</Text>
+      <TouchableHighlight style={styles.addButton}
+        onPress={this.props.addTodo}>
+        <Text style={styles.addText}>Add Todo</Text>
       </TouchableHighlight>
     );
   }

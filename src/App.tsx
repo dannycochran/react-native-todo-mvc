@@ -21,12 +21,14 @@ interface TodoItem {
 interface AppState {
   todos: TodoItem[];
   loading: boolean;
+  input: string;
 }
 
 export default class App extends React.Component<{}, AppState> {
   state = {
     loading: false,
-    todos: []
+    todos: [],
+    input: ''
   }
 
   async storeTodos(todos) {
@@ -45,21 +47,23 @@ export default class App extends React.Component<{}, AppState> {
     }));
   }
 
-  async addItem(description: string) {
+  async addTodo() {
     const timestamp = Date.now();
     const todos = [
       {
         timestamp,
-        description,
-        id: timestamp + description,
+        description: this.state.input,
+        id: timestamp + this.state.input,
         completed: false
       },
       ...this.state.todos
     ];
 
     await this.storeTodos(todos);
+    console.log('new items', todos);
     this.setState(prevState => ({
       ...prevState,
+      input: '',
       todos
     }));
   }
@@ -77,7 +81,7 @@ export default class App extends React.Component<{}, AppState> {
       <View style={styles.appContainer}>
         <Text style={styles.headerText}>todos</Text>
         <AddInput />
-        <AddButton />
+        <AddButton addTodo={this.addTodo.bind(this)}/>
       </View>
     );
   }
