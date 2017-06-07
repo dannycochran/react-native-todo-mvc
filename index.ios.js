@@ -7,25 +7,32 @@
 import React from 'react';
 import { AppRegistry, StyleSheet, Text, View } from 'react-native';
 
+import styles from './styles';
+
+import AddInput from './AddInput';
+
 export default class App extends React.Component {
+  state = {
+    input: '',
+    editing: false
+  }
+
+  onFocusInput(editing) {
+    this.setState({ editing });
+  }
+
+  onInput(input) {
+    this.setState({ input });
+  }
+
   render() {
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
+        <Text style={styles.headerText}>todos</Text>
+        <AddInput onFocus={this.onFocusInput.bind(this)} onInput={this.onInput.bind(this)} input={this.state.input}/>
       </View>
     );
   }
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
 
 AppRegistry.registerComponent('actual', () => App);
